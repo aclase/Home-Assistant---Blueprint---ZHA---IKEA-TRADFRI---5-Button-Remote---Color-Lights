@@ -10,12 +10,8 @@
 # | Right    | Change color        |
 # | Left     | Change saturation   |
 
-# Installation
-# Copy the URL and use it to IMPORT BLUEPRINT in your Home Assistant
-# https://gist.github.com/niro1987/ec1eecf6340cfd8f31a2b34e1e094c1e
-
 blueprint:
-  name: IKEA TRADFRI 5 Button Remote with brightness, color and saturation
+  name: ZHA - IKEA TRADFRI - 5 Button Remote - Color Lights
 
   description: >-
     This automation simulates the use of the IKEA TRADFRI Remote control
