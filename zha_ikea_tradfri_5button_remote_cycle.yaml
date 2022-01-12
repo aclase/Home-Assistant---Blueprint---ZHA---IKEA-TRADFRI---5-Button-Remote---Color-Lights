@@ -7,7 +7,7 @@
 # | Power    | Toggle the light    |
 # | Dim-Up   | Increase brightness |
 # | Dim-Down | Decrease brightness |
-# | Right    | Change color        |
+# | Right    | Next         |
 # | Left     | Change saturation   |
 
 blueprint:
