@@ -114,11 +114,7 @@ action:
                   target:
                     entity_id: !input light
                   data:
-                   # brightness_step_pct: 10
-                   brightness: >
-                     {% set current_brightness = state_attr(var_light, "brightness") | default(0) %}
-                     {% set new_brightness = [current_brightness - (255 * 20 / 100), 10] | max %}
-                     {{ new_brightness }}                   
+                    brightness_step_pct: 10
                     transition: "{{ (var_speed / 1000)|float }}"
                 - delay:
                     milliseconds: !input speed
