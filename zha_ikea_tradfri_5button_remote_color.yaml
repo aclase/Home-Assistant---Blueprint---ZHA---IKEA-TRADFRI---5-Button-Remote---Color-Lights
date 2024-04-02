@@ -128,7 +128,7 @@ action:
             target:
               entity_id: !input light
             data:
-              brightness_pct: "{{ [1, (state_attr(var_light, 'brightness_pct') | default(1) | float) - 20] | max }}"
+              brightness_pct: "{{ [10, (state_attr(var_light, 'brightness_pct') | default(10) | float) - 20] | max }}"
               transition: "{{ (var_speed / 1000)|float }}"
 
       # Long-Press on the dim-down button.
@@ -143,7 +143,7 @@ action:
                   target:
                     entity_id: !input light
                   data:
-                    brightness_pct: "{{ [1, (state_attr(var_light, 'brightness_pct') | default(1) | float) - 10] | max }}"
+                    brightness_pct: "{{ [10, (state_attr(var_light, 'brightness_pct') | default(10) | float) - 10] | max }}"
                     transition: "{{ (var_speed / 1000)|float }}"
                 - delay:
                     milliseconds: !input speed
