@@ -129,7 +129,7 @@ action:
               entity_id: !input light
             data:
               brightness: >
-                {% set current_brightness = state_attr(!input light, 'brightness') | default(254) | float %}
+                {% set current_brightness = state_attr('!input light', 'brightness') | default(254) | float %}
                 {% set min_brightness_value = 51 %}  # 10% of 254
                 {% set new_brightness = current_brightness - (20 / 100 * 254) %}
                 {% if new_brightness < min_brightness_value %}
