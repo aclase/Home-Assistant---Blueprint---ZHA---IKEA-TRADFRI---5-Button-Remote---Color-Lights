@@ -122,6 +122,21 @@ action:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       # Short-Press on the dim-down button.
       - conditions:
           - condition: template
