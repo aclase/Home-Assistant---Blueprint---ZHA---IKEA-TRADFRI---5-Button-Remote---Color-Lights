@@ -129,7 +129,8 @@ action:
               entity_id: !input light
             data:
               brightness_pct: >-
-                {% set curr_brightness = state_attr('light.hall_small_lamp', 'brightness_pct') | float(0) %}
+              #  {% set curr_brightness = state_attr('light.hall_small_lamp', 'brightness_pct') | float(0) %}
+                {% set curr_brightness = state_attr(var_light, 'brightness_pct') | float(0) %}
                 {{ max(1, curr_brightness - 20) }}
               transition: "{{ (var_speed / 1000)|float }}"
 
@@ -146,8 +147,8 @@ action:
                     entity_id: !input light
                   data:
                     brightness_pct: >-
-                      {% set curr_brightness = state_attr('light.hall_small_lamp', 'brightness_pct') | float(0) %}
-                      {{ max(1, curr_brightness - 20) }}
+                      {% set curr_brightness = state_attr(var_light, 'brightness_pct') | float(0) %}
+                      {{ max(1, curr_brightness - 10) }}
                     transition: "{{ (var_speed / 1000)|float }}"
                 - delay:
                     milliseconds: !input speed
