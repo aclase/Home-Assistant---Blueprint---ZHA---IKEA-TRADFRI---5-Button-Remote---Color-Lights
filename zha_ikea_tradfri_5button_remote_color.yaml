@@ -130,7 +130,7 @@ action:
             data:
               brightness: >
                 {% set current_brightness = state_attr(var_light, 'brightness') | default(254) | float %}
-                {% set min_brightness_value = 25.4 %}  # 10% of 254
+                {% set min_brightness_value = 51 %}  # 10% of 254
                 {% set new_brightness = current_brightness - (20 / 100 * 254) %}
                 {% if new_brightness < min_brightness_value %}
                   {{ min_brightness_value | round(0) | int }}  # Ensures it doesn't go below 10% brightness
