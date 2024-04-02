@@ -128,12 +128,10 @@ action:
             target:
               entity_id: !input light
             data:
-              brightness: >
-                {% set current_brightness = state_attr(var_light, "brightness") | default(50) %}
-                {% set decrease = (current_brightness * 0.8) | round %}
-                {{ decrease if decrease > 50 else 50 }}
+              brightness_step_pct: -20
+              brightness_pct: "{{ max(10, state_attr('light.hall_small_lamp', 'brightness_pct') | float(0))}}"
               transition: "{{ (var_speed / 1000)|float }}"
-              
+
       # Long-Press on the dim-down button.
       - conditions:
           - condition: template
