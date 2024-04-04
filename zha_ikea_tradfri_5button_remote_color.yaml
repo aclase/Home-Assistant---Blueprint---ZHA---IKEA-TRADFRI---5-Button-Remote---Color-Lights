@@ -12,7 +12,7 @@ blueprint:
       description: Select the remote control you wish to use.
       target:
         device:
-          - integration: deconz
+          - integration: zha
             manufacturer: IKEA of Sweden
             model: TRADFRI remote control
     light:
