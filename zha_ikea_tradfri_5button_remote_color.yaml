@@ -124,7 +124,7 @@ action:
               transition: "{{ (var_speed / 1000)|float }}"
 
               
-      # Gradually decrease brightness with a long press of the dim-down button, stopping at 20% brightness.
+      # Gradually decrease brightness with a long press of the dim-down button, stopping at 10% brightness.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "move" }}'
@@ -132,7 +132,7 @@ action:
           - repeat:
               while:
                 - condition: template
-                  value_template: "{{ state_attr(var_light, 'brightness')|default(0)|int > 26 }}" # Ensure above 20% of 255
+                  value_template: "{{ state_attr(var_light, 'brightness')|default(0)|int > 26 }}" # Ensure above 10% of 255
               sequence:
                 - service: light.turn_on
                   target:
@@ -141,7 +141,7 @@ action:
                     brightness: >
                       {% set current = state_attr(var_light, 'brightness')|default(0)|int %}
                       {% set decrease = 255 * 0.1 | int %}
-                      {% set new_brightness = [current - decrease, 51]|max %} # 20% of 255 is 51
+                      {% set new_brightness = [current - decrease, 26]|max %} # 10% of 255 is 26
                       {{ new_brightness }}
                 - delay:
                     milliseconds: !input speed
