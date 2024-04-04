@@ -120,7 +120,7 @@ action:
                       {% endif %}
                     transition: "{{ (var_speed / 1000) | float }}"
                 - delay:
-                    milliseconds: !input speed"
+                    milliseconds: !input speed
 
               
       # Gradually decrease brightness with a long press of the dim-down button, stopping at 10% brightness.
