@@ -147,7 +147,6 @@ action:
 
       # Long-Press on the dim-down button.
       - conditions:
-      - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "move" }}'
         sequence:
