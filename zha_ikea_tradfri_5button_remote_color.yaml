@@ -175,7 +175,7 @@ action:
             target:
               entity_id: !input light
             data:
-              color_temp_kelvin: >-
+              color_temp_kelvin: >
                 {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int) / var_color_multiplier) | round %}
                 {% set new_temp = [state_attr(var_light, 'color_temp_kelvin') | default(6500) | int - adjustment, state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int] | max %}
                 {{ new_temp }}
