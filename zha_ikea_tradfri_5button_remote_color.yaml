@@ -112,7 +112,7 @@ action:
               # Check if current brightness is above the minimum threshold before decreasing.
               - conditions:
                   - condition: template
-                    value_template: "{{ state_attr(var_light, 'brightness')|int > 26 }}"
+                    value_template: "{{ state_attr(var_light, 'brightness')|int > 35 }}"
                 sequence:
                   - service: light.turn_on
                     target:
@@ -129,7 +129,7 @@ action:
           - repeat:
               while:
                 - condition: template
-                  value_template: "{{ state_attr(var_light, 'brightness')|int > 26 }}"
+                  value_template: "{{ state_attr(var_light, 'brightness')|int > 35 }}"
               sequence:
                 - service: light.turn_on
                   target:
