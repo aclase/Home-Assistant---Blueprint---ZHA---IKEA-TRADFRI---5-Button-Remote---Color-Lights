@@ -197,6 +197,19 @@ action:
         - delay:
             milliseconds: !input speed
 
+
+
+
+
+
+
+
+
+
+
+
+
+
       # Right Button Long Press - Continuously decrease color temperature by 20%
       - conditions:
           - condition: template
