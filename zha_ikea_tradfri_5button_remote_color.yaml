@@ -147,6 +147,7 @@ action:
 
       # Long-Press on the dim-down button.
       - conditions:
+      - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "move" }}'
         sequence:
@@ -154,15 +155,21 @@ action:
               while:
                 - condition: template
                   value_template: >-
-                    {{ state_attr(var_light, 'brightness')|default(255) * 0.2 <
-                    (state_attr(var_light, 'brightness')|default(255) - (var_speed / 1000 * 255 * 0.1)) }}
+                    {{ (state_attr(var_light, 'brightness')|default(255) - (255 * 0.1)) >= 26 }}
               sequence:
                 - service: light.turn_on
                   target:
                     entity_id: !input light
-                  data:
-                    brightness_step_pct: -10
-                    transition: "{{ (var_speed / 1000)|float }}"
+                  data_template:
+                    brightness: >-
+                      {% set current_brightness = state_attr(var_light, 'brightness')|default(255) %}
+                      {% set new_brightness = current_brightness - (255 * 0.1) %}
+                      {% if new_brightness < 26 %}
+                        26
+                      {% else %}
+                        {{ new_brightness }}
+                      {% endif %}
+                  transition: "{{ (var_speed / 1000)|float }}"
                 - delay:
                     milliseconds: !input speed
 
