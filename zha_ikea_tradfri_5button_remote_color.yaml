@@ -127,24 +127,24 @@ action:
       # Gradually decrease brightness with a long press of the dim-down button, stopping at 10% brightness.
       - conditions:
           - condition: template
-            value_template: '{{ trigger.event.data.command == "move" }}'
+            value_template: '{{ trigger.event.data.command == "move" }}'  # Adjust based on the actual command for long press
         sequence:
           - repeat:
               while:
                 - condition: template
-                  value_template: "{{ state_attr(var_light, 'brightness')|default(0)|int > 26 }}" # Ensure above 10% of 255
+                  value_template: "{{ state_attr(var_light, 'brightness')|default(0)|int > 26 }}"  # Ensure above 10%
               sequence:
                 - service: light.turn_on
                   target:
-                    entity_id: !input light
-                  data_template:
+                    entity_id: "{{ var_light }}"
+                  data:
                     brightness: >
                       {% set current = state_attr(var_light, 'brightness')|default(0)|int %}
-                      {% set decrease = 255 * 0.1 | int %}
-                      {% set new_brightness = [current - decrease, 26]|max %} # 10% of 255 is 26
+                      {% set decrease = (current * 0.1) | int %}
+                      {% set new_brightness = [current - decrease, 26]|max %}  # Ensure it doesn't drop below 10%
                       {{ new_brightness }}
                 - delay:
-                    milliseconds: !input speed
+                    milliseconds: "{{ var_speed }}"
 
 
       # Right Button Short Press - Decrease color temperature by 20% towards cooler
