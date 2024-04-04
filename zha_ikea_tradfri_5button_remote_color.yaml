@@ -51,6 +51,7 @@ trigger:
 
 action:
   - choose:
+      # Toggle the light on or off with a short press of the power button.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "toggle" }}'
@@ -58,6 +59,8 @@ action:
           - service: light.toggle
             target:
               entity_id: !input light
+
+      # Set the light to maximum brightness with a long press of the power button.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "move_to_level_with_on_off" }}'
@@ -70,6 +73,8 @@ action:
               hs_color:
                 - 38.222
                 - 52.941
+
+      # Increase brightness with a short press of the dim-up button.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "step_with_on_off" }}'
@@ -80,6 +85,8 @@ action:
             data:
               brightness_step_pct: 20
               transition: "{{ (var_speed / 1000)|float }}"
+
+      # Gradually increase brightness with a long press of the dim-up button.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "move_with_on_off" }}'
@@ -95,16 +102,26 @@ action:
                     transition: "{{ (var_speed / 1000)|float }}"
                 - delay:
                     milliseconds: !input speed
+
+      # Decrease brightness with a short press of the dim-down button, ensuring brightness does not fall below 20%.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "step" }}'
         sequence:
-          - service: light.turn_on
-            target:
-              entity_id: !input light
-            data:
-              brightness_step_pct: -20
-              transition: "{{ (var_speed / 1000)|float }}"
+          - choose:
+              # Check if current brightness is above the minimum threshold before decreasing.
+              - conditions:
+                  - condition: template
+                    value_template: "{{ state_attr(var_light, 'brightness')|int > 26 }}"
+                sequence:
+                  - service: light.turn_on
+                    target:
+                      entity_id: !input light
+                    data:
+                      brightness_step_pct: -20
+                      transition: "{{ (var_speed / 1000)|float }}"
+
+      # Gradually decrease brightness with a long press of the dim-down button, stopping at 20% brightness.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "move" }}'
@@ -112,7 +129,7 @@ action:
           - repeat:
               while:
                 - condition: template
-                  value_template: "{{ state_attr(var_light, 'brightness')|int > 51 }}"
+                  value_template: "{{ state_attr(var_light, 'brightness')|int > 26 }}"
               sequence:
                 - service: light.turn_on
                   target:
@@ -122,6 +139,8 @@ action:
                     transition: "{{ (var_speed / 1000)|float }}"
                 - delay:
                     milliseconds: !input speed
+
+      # Change color with a short press of the right button.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "press" }}'
@@ -141,6 +160,8 @@ action:
                   {% endif %}
                 - '{{ state_attr(var_light, "hs_color")[1] }}'
               transition: "{{ (var_speed / 1000)|float }}"
+
+      # Continuously change color with a long press of the right button.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "hold" }}'
@@ -165,6 +186,8 @@ action:
                     transition: "{{ (var_speed / 1000)|float }}"
                 - delay:
                     milliseconds: !input speed
+
+      # Adjust saturation with a short press of the left button.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "press" }}'
@@ -184,6 +207,8 @@ action:
                     {{ state_attr(var_light, "hs_color")[1] - 20 }}
                   {% endif %}
               transition: "{{ (var_speed / 1000)|float }}"
+
+      # Continuously adjust saturation with a long press of the left button.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "hold" }}'
