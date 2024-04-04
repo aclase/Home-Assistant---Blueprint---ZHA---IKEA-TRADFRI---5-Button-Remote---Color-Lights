@@ -131,18 +131,23 @@ action:
         sequence:
           - repeat:
               while:
+                # Ensures brightness is checked before each decrease to prevent going below 20%
                 - condition: template
-                  value_template: "{{ state_attr(var_light, 'brightness')|default(0)|int > 26 }}" # Ensure above 20% of 255
+                  value_template: "{{ state_attr(var_light, 'brightness')|default(255)|int > 51 }}" # Stops at >20% to allow for decrease
               sequence:
+                - variables:
+                    # Calculate the next brightness level, ensuring it does not drop below the 20% threshold
+                    new_brightness: >
+                      {% set current_brightness = state_attr(var_light, 'brightness')|default(255)|int %}
+                      {% set decrement = (current_brightness * 0.1)|round(0)|int %} # 10% decrease
+                      {% set min_brightness = 51 %} # 20% of 255
+                      {{ [current_brightness - decrement, min_brightness]|max }}
                 - service: light.turn_on
                   target:
                     entity_id: !input light
-                  data_template:
-                    brightness: >
-                      {% set current = state_attr(var_light, 'brightness')|default(0)|int %}
-                      {% set decrease = 255 * 0.1 | int %}
-                      {% set new_brightness = [current - decrease, 51]|max %} # 20% of 255 is 51
-                      {{ new_brightness }}
+                  data:
+                    brightness: "{{ new_brightness }}"
+                    transition: "{{ (var_speed / 1000)|float }}"
                 - delay:
                     milliseconds: !input speed
 
@@ -157,9 +162,9 @@ action:
               entity_id: !input light
             data:
               color_temp_kelvin: >-
-                {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.8)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
                 {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.85)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
 
+          
       # Right Button Long Press - Continuously decrease color temperature by 10%
       - conditions:
           - condition: template
