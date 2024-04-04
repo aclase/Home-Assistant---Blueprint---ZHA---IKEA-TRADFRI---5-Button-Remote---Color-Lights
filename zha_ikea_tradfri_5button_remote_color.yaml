@@ -93,7 +93,9 @@ action:
           - repeat:
               while:
                 - condition: template
-                  value_template: "{{ state_attr(var_light, 'brightness') | default(0) | int < 230 }}"  # Ensures we don't exceed the max after increase
+                  # Ensure the loop can exit by checking if brightness is less than a max threshold to avoid an infinite loop.
+                  # This is a placeholder; adjust or manage externally as needed.
+                  value_template: "{{ state_attr(var_light, 'brightness') | default(0) | int < 230 }}"
               sequence:
                 - service: light.turn_on
                   target:
@@ -101,8 +103,8 @@ action:
                   data:
                     brightness: >
                       {% set current_brightness = state_attr(var_light, 'brightness') | default(0) | int %}
-                      {% set increase_step = (255 * 0.1) | round %}  # 10% of max brightness
-                      {% set new_brightness = current_brightness + increase_step %}
+                      {% set increase_by = (current_brightness * 0.1) | round %}
+                      {% set new_brightness = current_brightness + increase_by %}
                       {% if new_brightness > 255 %}
                         {% set new_brightness = 255 %}
                       {% endif %}
