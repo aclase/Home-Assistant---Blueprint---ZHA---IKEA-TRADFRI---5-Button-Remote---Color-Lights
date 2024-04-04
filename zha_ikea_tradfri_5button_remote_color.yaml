@@ -1,23 +1,29 @@
 blueprint:
-  name: ZHA - IKEA TRADFRI - 5 Button Remote - Color Lights
-  description: This automation simulates the use of the IKEA TRADFRI remote control connected through ZHA.
-  domain: automation
   source_url: https://github.com/niro1987/homeassistant-config/blob/main/blueprints/automation/niro1987/zha_ikea_tradfri_5button_remote_color.yaml
+  name: ZHA - IKEA TRADFRI - 5 Button Remote - Color Lights
+  description: >-
+    This automation simulates the use of the IKEA TRADFRI remote control
+    connected through ZHA.
+  domain: automation
   input:
     remote:
       name: IKEA TRADFRI remote control
       description: Select the remote control you wish to use.
       selector:
         device:
-          integration: zha
-          manufacturer: IKEA of Sweden
-          model: TRADFRI remote control
+          multiple: false
+          filter:
+            - integration: zha
+              manufacturer: IKEA of Sweden
+              model: TRADFRI remote control
     light:
       name: Light
       description: Select the light entity you wish to control.
       selector:
         entity:
-          domain: light
+          multiple: false
+          filter:
+            - domain: light
     speed:
       name: Speed
       description: The speed in which to update the light when the button is held.
@@ -45,7 +51,6 @@ trigger:
 
 action:
   - choose:
-      # Power Button Toggle
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "toggle" }}'
@@ -53,8 +58,18 @@ action:
           - service: light.toggle
             target:
               entity_id: !input light
-
-      # Dim-Up Button Short-Press
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "move_to_level_with_on_off" }}'
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input light
+            data:
+              brightness: 254
+              hs_color:
+                - 38.222
+                - 52.941
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "step_with_on_off" }}'
@@ -64,8 +79,22 @@ action:
               entity_id: !input light
             data:
               brightness_step_pct: 20
-
-      # Dim-Down Button Short-Press
+              transition: "{{ (var_speed / 1000)|float }}"
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "move_with_on_off" }}'
+        sequence:
+          - repeat:
+              while: []
+              sequence:
+                - service: light.turn_on
+                  target:
+                    entity_id: !input light
+                  data:
+                    brightness_step_pct: 10
+                    transition: "{{ (var_speed / 1000)|float }}"
+                - delay:
+                    milliseconds: !input speed
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "step" }}'
@@ -75,45 +104,108 @@ action:
               entity_id: !input light
             data:
               brightness_step_pct: -20
-
-      # Right Button Short-Press (Change Color)
+              transition: "{{ (var_speed / 1000)|float }}"
       - conditions:
           - condition: template
-            value_template: '{{ trigger.event.data.command == "press" and trigger.event.data.args == [256,13,0] }}'
+            value_template: '{{ trigger.event.data.command == "move" }}'
+        sequence:
+          - repeat:
+              while:
+                - condition: template
+                  value_template: "{{ state_attr(var_light, 'brightness')|int > 51 }}"
+              sequence:
+                - service: light.turn_on
+                  target:
+                    entity_id: !input light
+                  data:
+                    brightness_step_pct: -10
+                    transition: "{{ (var_speed / 1000)|float }}"
+                - delay:
+                    milliseconds: !input speed
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "press" }}'
+          - condition: template
+            value_template: "{{ trigger.event.data.args == [256,13,0] }}"
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input light
-            data_template:
+            data:
               hs_color:
                 - >-
-                  {% set hue = state_attr(var_light, "hs_color")[0] + 18 %}
-                  {% if hue > 360 %}
-                    {{ hue - 360 }}
+                  {% if state_attr(var_light, "hs_color")[0] + 18 > 360 %}
+                    {{ state_attr(var_light, "hs_color")[0] + 18 - 360 }}
                   {% else %}
-                    {{ hue }}
+                    {{ state_attr(var_light, "hs_color")[0] + 18 }}
                   {% endif %}
                 - '{{ state_attr(var_light, "hs_color")[1] }}'
-
-      # Left Button Short-Press (Change Saturation)
+              transition: "{{ (var_speed / 1000)|float }}"
       - conditions:
           - condition: template
-            value_template: '{{ trigger.event.data.command == "press" and trigger.event.data.args == [257,13,0] }}'
+            value_template: '{{ trigger.event.data.command == "hold" }}'
+          - condition: template
+            value_template: "{{ trigger.event.data.args == [3328,0] }}"
+        sequence:
+          - repeat:
+              while: []
+              sequence:
+                - service: light.turn_on
+                  target:
+                    entity_id: !input light
+                  data:
+                    hs_color:
+                      - >-
+                        {% if state_attr(var_light, "hs_color")[0] + 18 > 360 %}
+                          {{ state_attr(var_light, "hs_color")[0] + 18 - 360 }}
+                        {% else %}
+                          {{ state_attr(var_light, "hs_color")[0] + 18 }}
+                        {% endif %}
+                      - '{{ state_attr(var_light, "hs_color")[1] }}'
+                    transition: "{{ (var_speed / 1000)|float }}"
+                - delay:
+                    milliseconds: !input speed
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "press" }}'
+          - condition: template
+            value_template: "{{ trigger.event.data.args == [257,13,0] }}"
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input light
-            data_template:
+            data:
               hs_color:
                 - '{{ state_attr(var_light, "hs_color")[0] }}'
                 - >-
-                  {% set saturation = state_attr(var_light, "hs_color")[1] - 20 %}
-                  {% if saturation < 0 %}
-                    {{ saturation + 100 }}
+                  {% if state_attr(var_light, "hs_color")[1] - 20 < 0 %}
+                    {{ state_attr(var_light, "hs_color")[1] - 20 + 100 }}
                   {% else %}
-                    {{ saturation }}
+                    {{ state_attr(var_light, "hs_color")[1] - 20 }}
                   {% endif %}
-
-      # Long-Press Adjustments (Dim-Up, Dim-Down, Right, Left) are handled similarly with repeats and adjustments as needed
-
+              transition: "{{ (var_speed / 1000)|float }}"
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "hold" }}'
+          - condition: template
+            value_template: "{{ trigger.event.data.args == [3329,0] }}"
+        sequence:
+          - repeat:
+              while: []
+              sequence:
+                - service: light.turn_on
+                  target:
+                    entity_id: !input light
+                  data:
+                    hs_color:
+                      - '{{ state_attr(var_light, "hs_color")[0] }}'
+                      - >-
+                        {% if state_attr(var_light, "hs_color")[1] - 10 < 0 %}
+                          {{ state_attr(var_light, "hs_color")[1] - 10 + 100 }}
+                        {% else %}
+                          {{ state_attr(var_light, "hs_color")[1] - 10 }}
+                        {% endif %}
+                    transition: "{{ (var_speed / 1000)|float }}"
+                - delay:
+                    milliseconds: !input speed
     default: []
