@@ -132,7 +132,7 @@ action:
           - repeat:
               while:
                 - condition: template
-                  value_template: "{{ state_attr(var_light, 'brightness')|int > 35 }}"
+                  value_template: "{{ state_attr(var_light, 'brightness')|int > 3 }}"
               sequence:
                 - service: light.turn_on
                   target:
