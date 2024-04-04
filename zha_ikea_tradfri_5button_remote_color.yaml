@@ -43,6 +43,7 @@ max_exceeded: silent
 variables:
   var_light: !input light
   var_speed: !input speed
+  var_color_multiplier: 4
 
 trigger:
   - platform: event
@@ -174,9 +175,13 @@ action:
             target:
               entity_id: !input light
             data:
-              color_temp_kelvin: >-
-                {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.8)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
-
+              color_temp_kelvin: >
+                {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int) / var_color_multiplier) | round %}
+                {% set new_temp = [state_attr(var_light, 'color_temp_kelvin') | default(6500) | int - adjustment, state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int] | max %}
+                {{ new_temp }}
+            - delay:
+                milliseconds: !input speed
+                
       # Right Button Long Press - Continuously decrease color temperature by 20%
       - conditions:
           - condition: template
@@ -189,8 +194,10 @@ action:
                   target:
                     entity_id: !input light
                   data:
-                    color_temp_kelvin: >-
-                      {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.8)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
+                    color_temp_kelvin: >
+                      {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int) / var_color_multiplier) | round %}
+                      {% set new_temp = [state_attr(var_light, 'color_temp_kelvin') | default(6500) | int - adjustment, state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int] | max %}
+                      {{ new_temp }}
                 - delay:
                     milliseconds: !input speed
 
@@ -203,8 +210,12 @@ action:
             target:
               entity_id: !input light
             data:
-              color_temp_kelvin: >-
-                {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int) * 1.2)|round, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
+              color_temp_kelvin: >
+                {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int) / var_color_multiplier) | round %}
+                {% set new_temp = [state_attr(var_light, 'color_temp_kelvin') | default(2500) | int + adjustment, state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int] | min %}
+                {{ new_temp }}
+            - delay:
+                milliseconds: !input speed
 
       # Left Button Long Press - Continuously increase color temperature by 20%
       - conditions:
@@ -218,8 +229,10 @@ action:
                   target:
                     entity_id: !input light
                   data:
-                    color_temp_kelvin: >-
-                      {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int) * 1.2)|round, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
+                    color_temp_kelvin: >
+                      {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int) / var_color_multiplier) | round %}
+                      {% set new_temp = [state_attr(var_light, 'color_temp_kelvin') | default(2500) | int + adjustment, state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int] | min %}
+                      {{ new_temp }}
                 - delay:
                     milliseconds: !input speed
 
