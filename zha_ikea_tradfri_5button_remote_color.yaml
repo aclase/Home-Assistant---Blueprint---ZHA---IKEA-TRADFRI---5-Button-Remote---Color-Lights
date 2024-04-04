@@ -103,15 +103,16 @@ action:
                 - delay:
                     milliseconds: !input speed
 
-      # Decrease brightness with a short press of the dim-down button, ensuring brightness does not fall below 1%.
+      # Decrease brightness with a short press of the dim-down button, ensuring brightness does not fall below 20%.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "step" }}'
         sequence:
           - variables:
               current_brightness: "{{ state_attr(var_light, 'brightness') }}"
-              min_brightness: 26  # 1% of 255
-              # Calculate the new brightness to ensure it doesn't drop below 1%
+              min_brightness: 26  # 10% of 255
+              # Calculate the new brightness to ensure it doesn't drop below 10%
+              # We subtract 51 (20% step) from the current brightness, but not letting it go below 10% minimum
               new_brightness: "{{ [current_brightness|int - 51, min_brightness]|max }}"
           - condition: template
             value_template: "{{ current_brightness|int > min_brightness }}"
@@ -126,16 +127,18 @@ action:
       # Gradually decrease brightness with a long press of the dim-down button, stopping at 20% brightness.
       - conditions:
           - condition: template
-            value_template: '{{ trigger.event.data.command == "move_with_on_off" }}'
+            value_template: '{{ trigger.event.data.command == "move" }}'
         sequence:
           - repeat:
-              while: []
+              while:
+                - condition: template
+                  value_template: "{{ state_attr(var_light, 'brightness')|int > 35 }}"
               sequence:
                 - service: light.turn_on
                   target:
                     entity_id: !input light
                   data:
-                    brightness_step_pct: 10
+                    brightness_step_pct: -10
                     transition: "{{ (var_speed / 1000)|float }}"
                 - delay:
                     milliseconds: !input speed
