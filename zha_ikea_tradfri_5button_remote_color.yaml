@@ -156,8 +156,8 @@ action:
             target:
               entity_id: !input light
             data:
-              color_temp: >-
-                {{ [((state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.8)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
+              color_temp_kelvin: >-
+                {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.8)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
 
       # Right Button Long Press - Continuously decrease color temperature by 10%
       - conditions:
@@ -171,8 +171,8 @@ action:
                   target:
                     entity_id: !input light
                   data:
-                    color_temp: >-
-                      {{ [((state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.9)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
+                    color_temp_kelvin: >-
+                      {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.9)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
                 - delay:
                     milliseconds: !input speed
 
@@ -185,8 +185,8 @@ action:
             target:
               entity_id: !input light
             data:
-              color_temp: >-
-                {{ [((state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int) * 1.2)|round, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
+              color_temp_kelvin: >-
+                {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int) * 1.2)|round, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
 
       # Left Button Long Press - Continuously increase color temperature by 10%
       - conditions:
@@ -200,8 +200,8 @@ action:
                   target:
                     entity_id: !input light
                   data:
-                    color_temp: >-
-                      {{ [((state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int) * 1.1)|round, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
+                    color_temp_kelvin: >-
+                      {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int) * 1.1)|round, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
                 - delay:
                     milliseconds: !input speed
 
