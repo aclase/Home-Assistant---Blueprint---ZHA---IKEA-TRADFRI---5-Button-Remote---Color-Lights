@@ -95,7 +95,7 @@ action:
                 - condition: template
                   # Ensure the loop can exit by checking if brightness is less than a max threshold to avoid an infinite loop.
                   # This is a placeholder; adjust or manage externally as needed.
-                  value_template: "{{ state_attr(var_light, 'brightness') | default(0) | int < 230 }}"
+                  value_template: "{{ state_attr(var_light, 'brightness') | default(0) | int < 235 }}"
               sequence:
                 - service: light.turn_on
                   target:
