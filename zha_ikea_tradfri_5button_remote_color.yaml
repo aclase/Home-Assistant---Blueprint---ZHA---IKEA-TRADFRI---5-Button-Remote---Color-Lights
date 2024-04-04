@@ -110,7 +110,7 @@ action:
         sequence:
           - variables:
               current_brightness: "{{ state_attr(var_light, 'brightness') }}"
-              min_brightness: 3  # 1% of 255
+              min_brightness: 26  # 1% of 255
               # Calculate the new brightness to ensure it doesn't drop below 1%
               new_brightness: "{{ [current_brightness|int - 51, min_brightness]|max }}"
           - condition: template
