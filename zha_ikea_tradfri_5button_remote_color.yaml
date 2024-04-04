@@ -145,8 +145,8 @@ action:
                       {{ new_brightness }}
                 - delay:
                     milliseconds: !input speed
-
-      # Change color with a short press of the right button.
+      # Change color temperature with a short press of the right button.
+      # This sets the color temperature to 80% towards the cooler light spectrum.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "press" }}'
@@ -157,17 +157,12 @@ action:
             target:
               entity_id: !input light
             data:
-              hs_color:
-                - >-
-                  {% if state_attr(var_light, "hs_color")[0] + 18 > 360 %}
-                    {{ state_attr(var_light, "hs_color")[0] + 18 - 360 }}
-                  {% else %}
-                    {{ state_attr(var_light, "hs_color")[0] + 18 }}
-                  {% endif %}
-                - '{{ state_attr(var_light, "hs_color")[1] }}'
+              color_temp: >-
+                {{ [((state_attr(var_light, 'min_color_temp_kelvin')|int - state_attr(var_light, 'max_color_temp_kelvin')|int) * 0.8 + state_attr(var_light, 'max_color_temp_kelvin')|int)|int, state_attr(var_light, 'min_color_temp_kelvin')]|max }}
               transition: "{{ (var_speed / 1000)|float }}"
 
-      # Continuously change color with a long press of the right button.
+      # Continuously change color temperature with a long press of the right button.
+      # This gradually changes the color temperature towards the warmer light spectrum by 10% steps.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "hold" }}'
@@ -181,62 +176,10 @@ action:
                   target:
                     entity_id: !input light
                   data:
-                    hs_color:
-                      - >-
-                        {% if state_attr(var_light, "hs_color")[0] + 18 > 360 %}
-                          {{ state_attr(var_light, "hs_color")[0] + 18 - 360 }}
-                        {% else %}
-                          {{ state_attr(var_light, "hs_color")[0] + 18 }}
-                        {% endif %}
-                      - '{{ state_attr(var_light, "hs_color")[1] }}'
-                    transition: "{{ (var_speed / 1000)|float }}"
+                    color_temp: >-
+                      {{ [((state_attr(var_light, 'max_color_temp_kelvin')|int - state_attr(var_light, 'min_color_temp_kelvin')|int) * 0.1 + state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int)|int, state_attr(var_light, 'max_color_temp_kelvin')]|min }}
                 - delay:
                     milliseconds: !input speed
 
-      # Adjust saturation with a short press of the left button.
-      - conditions:
-          - condition: template
-            value_template: '{{ trigger.event.data.command == "press" }}'
-          - condition: template
-            value_template: "{{ trigger.event.data.args == [257,13,0] }}"
-        sequence:
-          - service: light.turn_on
-            target:
-              entity_id: !input light
-            data:
-              hs_color:
-                - '{{ state_attr(var_light, "hs_color")[0] }}'
-                - >-
-                  {% if state_attr(var_light, "hs_color")[1] - 20 < 0 %}
-                    {{ state_attr(var_light, "hs_color")[1] - 20 + 100 }}
-                  {% else %}
-                    {{ state_attr(var_light, "hs_color")[1] - 20 }}
-                  {% endif %}
-              transition: "{{ (var_speed / 1000)|float }}"
 
-      # Continuously adjust saturation with a long press of the left button.
-      - conditions:
-          - condition: template
-            value_template: '{{ trigger.event.data.command == "hold" }}'
-          - condition: template
-            value_template: "{{ trigger.event.data.args == [3329,0] }}"
-        sequence:
-          - repeat:
-              while: []
-              sequence:
-                - service: light.turn_on
-                  target:
-                    entity_id: !input light
-                  data:
-                    hs_color:
-                      - '{{ state_attr(var_light, "hs_color")[0] }}'
-                      - >-
-                        {% if state_attr(var_light, "hs_color")[1] - 10 < 0 %}
-                          {{ state_attr(var_light, "hs_color")[1] - 10 + 100 }}
-                        {% else %}
-                          {{ state_attr(var_light, "hs_color")[1] - 10 }}
-                        {% endif %}
-                    transition: "{{ (var_speed / 1000)|float }}"
-                - delay:
-                    milliseconds: !input speed
     default: []
