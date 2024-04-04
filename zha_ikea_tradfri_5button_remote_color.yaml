@@ -103,68 +103,70 @@ action:
                 - delay:
                     milliseconds: !input speed
 
-              
-      # Gradually decrease brightness with a long press of the dim-down button, stopping at 10% brightness.
-      - conditions:
-          - condition: template
-            value_template: '{{ trigger.event.data.command == "move_with_on_off" }}'  # Adjust based on the actual command for long press
-        sequence:
-          - repeat:
-              while:
-                - condition: template
-                  value_template: "{{ state_attr(var_light, 'brightness')|default(0)|int > 26 }}"  # Ensure above 10%
-              sequence:
-                - service: light.turn_on
-                  target:
-                    entity_id: "{{ var_light }}"
-                  data:
-                    brightness: >
-                      {% set current = state_attr(var_light, 'brightness')|default(0)|int %}
-                      {% set decrease = (current * 0.1) | int %}
-                      {% set new_brightness = [current - decrease, 26]|max %}  # Ensure it doesn't drop below 10%
-                      {{ new_brightness }}
-                - delay:
-                    milliseconds: "{{ var_speed }}"
-
-                    
       # Decrease brightness with a short press of the dim-down button, ensuring brightness does not fall below 20%.
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "step" }}'
         sequence:
-          - variables:
-              current_brightness: "{{ state_attr(var_light, 'brightness') }}"
-              min_brightness: 26  # 10% of 255
-              # Calculate the new brightness to ensure it doesn't drop below 10%
-              # We subtract 51 (20% step) from the current brightness, but not letting it go below 10% minimum
-              new_brightness: "{{ [current_brightness|int - 51, min_brightness]|max }}"
+          - choose:
+              # Check if current brightness is above the minimum threshold before decreasing.
+              - conditions:
+                  - condition: template
+                    value_template: "{{ state_attr(var_light, 'brightness')|int > 26 }}"
+                sequence:
+                  - service: light.turn_on
+                    target:
+                      entity_id: !input light
+                    data:
+                      brightness_step_pct: -20
+                      transition: "{{ (var_speed / 1000)|float }}"
+
+      # Gradually decrease brightness with a long press of the dim-down button, stopping at 20% brightness.
+      - conditions:
           - condition: template
-            value_template: "{{ current_brightness|int > min_brightness }}"
+            value_template: '{{ trigger.event.data.command == "move" }}'
+        sequence:
+          - repeat:
+              while:
+                - condition: template
+                  value_template: "{{ state_attr(var_light, 'brightness')|int > 26 }}"
+              sequence:
+                - service: light.turn_on
+                  target:
+                    entity_id: !input light
+                  data:
+                    brightness_step_pct: -10
+                    transition: "{{ (var_speed / 1000)|float }}"
+                - delay:
+                    milliseconds: !input speed
+
+      # Change color with a short press of the right button.
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "press" }}'
+          - condition: template
+            value_template: "{{ trigger.event.data.args == [256,13,0] }}"
+        sequence:
           - service: light.turn_on
             target:
               entity_id: !input light
             data:
-              brightness: "{{ new_brightness }}"
+              hs_color:
+                - >-
+                  {% if state_attr(var_light, "hs_color")[0] + 18 > 360 %}
+                    {{ state_attr(var_light, "hs_color")[0] + 18 - 360 }}
+                  {% else %}
+                    {{ state_attr(var_light, "hs_color")[0] + 18 }}
+                  {% endif %}
+                - '{{ state_attr(var_light, "hs_color")[1] }}'
               transition: "{{ (var_speed / 1000)|float }}"
 
-
-
-      # Right Button Short Press - Decrease color temperature by 20% towards cooler
+      # Continuously change color with a long press of the right button.
       - conditions:
           - condition: template
-            value_template: '{{ trigger.event.data.command == "press" and trigger.event.data.args == [256,13,0] }}'
-        sequence:
-          - service: light.turn_on
-            target:
-              entity_id: !input light
-            data:
-              color_temp_kelvin: >-
-                {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.8)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
-
-      # Right Button Long Press - Continuously decrease color temperature by 10%
-      - conditions:
+            value_template: '{{ trigger.event.data.command == "hold" }}'
           - condition: template
-            value_template: '{{ trigger.event.data.command == "hold" and trigger.event.data.args == [3328,0] }}'
+            value_template: "{{ trigger.event.data.args == [3328,0] }}"
         sequence:
           - repeat:
               while: []
@@ -173,27 +175,45 @@ action:
                   target:
                     entity_id: !input light
                   data:
-                    color_temp_kelvin: >-
-                      {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.9)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
+                    hs_color:
+                      - >-
+                        {% if state_attr(var_light, "hs_color")[0] + 18 > 360 %}
+                          {{ state_attr(var_light, "hs_color")[0] + 18 - 360 }}
+                        {% else %}
+                          {{ state_attr(var_light, "hs_color")[0] + 18 }}
+                        {% endif %}
+                      - '{{ state_attr(var_light, "hs_color")[1] }}'
+                    transition: "{{ (var_speed / 1000)|float }}"
                 - delay:
                     milliseconds: !input speed
 
-      # Left Button Short Press - Increase color temperature by 20% towards warmer
+      # Adjust saturation with a short press of the left button.
       - conditions:
           - condition: template
-            value_template: '{{ trigger.event.data.command == "press" and trigger.event.data.args == [257,13,0] }}'
+            value_template: '{{ trigger.event.data.command == "press" }}'
+          - condition: template
+            value_template: "{{ trigger.event.data.args == [257,13,0] }}"
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input light
             data:
-              color_temp_kelvin: >-
-                {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int) * 1.2)|round, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
+              hs_color:
+                - '{{ state_attr(var_light, "hs_color")[0] }}'
+                - >-
+                  {% if state_attr(var_light, "hs_color")[1] - 20 < 0 %}
+                    {{ state_attr(var_light, "hs_color")[1] - 20 + 100 }}
+                  {% else %}
+                    {{ state_attr(var_light, "hs_color")[1] - 20 }}
+                  {% endif %}
+              transition: "{{ (var_speed / 1000)|float }}"
 
-      # Left Button Long Press - Continuously increase color temperature by 10%
+      # Continuously adjust saturation with a long press of the left button.
       - conditions:
           - condition: template
-            value_template: '{{ trigger.event.data.command == "hold" and trigger.event.data.args == [3329,0] }}'
+            value_template: '{{ trigger.event.data.command == "hold" }}'
+          - condition: template
+            value_template: "{{ trigger.event.data.args == [3329,0] }}"
         sequence:
           - repeat:
               while: []
@@ -202,10 +222,15 @@ action:
                   target:
                     entity_id: !input light
                   data:
-                    color_temp_kelvin: >-
-                      {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int) * 1.1)|round, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
+                    hs_color:
+                      - '{{ state_attr(var_light, "hs_color")[0] }}'
+                      - >-
+                        {% if state_attr(var_light, "hs_color")[1] - 10 < 0 %}
+                          {{ state_attr(var_light, "hs_color")[1] - 10 + 100 }}
+                        {% else %}
+                          {{ state_attr(var_light, "hs_color")[1] - 10 }}
+                        {% endif %}
+                    transition: "{{ (var_speed / 1000)|float }}"
                 - delay:
                     milliseconds: !input speed
-
-
     default: []
