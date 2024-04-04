@@ -10,6 +10,7 @@ blueprint:
     remote:
       name: IKEA TRADFRI remote control
       description: Select the remote control you wish to use.
+      
       target:
         device:
           - integration: zha
