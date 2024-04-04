@@ -154,6 +154,7 @@ action:
 
       # Right Button Short Press - Decrease color temperature by 15% towards cooler
       - conditions:
+      - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "press" and trigger.event.data.args == [256,13,0] }}'
         sequence:
@@ -162,7 +163,7 @@ action:
               entity_id: !input light
             data:
               color_temp_kelvin: >-
-                {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.85)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
+                {{ [((state_attr(var_light, 'color_temp_kelvin')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int) * 1.15)|round, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
 
           
       # Right Button Long Press - Continuously decrease color temperature by 10%
@@ -182,7 +183,7 @@ action:
                 - delay:
                     milliseconds: !input speed
 
-      # Left Button Short Press - Increase color temperature by 20% towards warmer
+      # Left Button Short Press - Increase color temperature by 15% towards warmer
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "press" and trigger.event.data.args == [257,13,0] }}'
