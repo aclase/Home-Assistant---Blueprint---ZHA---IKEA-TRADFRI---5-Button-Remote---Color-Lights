@@ -71,9 +71,7 @@ action:
               entity_id: !input light
             data:
               brightness: 254
-              hs_color:
-                - 38.222
-                - 52.941
+              color_temp_kelvin: 2800
 
       # Increase brightness with a short press of the dim-up button.
       - conditions:
@@ -103,7 +101,7 @@ action:
                   data:
                     brightness: >
                       {% set current_brightness = state_attr(var_light, 'brightness') | default(0) | int %}
-                      {% set fixed_increase = 52 %}  # Fixed 20% increase of the max brightness value (255 * 0.2)
+                      {% set fixed_increase = 51 %}  # Fixed 20% increase of the max brightness value (255 * 0.2)
                       {% set new_brightness = current_brightness + fixed_increase %}
                       {% if new_brightness > 255 %}
                         {% set new_brightness = 255 %}
