@@ -95,7 +95,7 @@ action:
           - repeat:
               while:
                 - condition: template
-                  value_template: "{{ state_attr(var_light, 'brightness') | default(0) | int > 26 }}"  # Check if brightness > 10%
+                  value_template: "{{ state_attr(var_light, 'brightness') | default(0) | int < 230 }}"
               sequence:
                 - service: light.turn_on
                   target:
@@ -103,7 +103,7 @@ action:
                   data:
                     brightness: >
                       {% set current_brightness = state_attr(var_light, 'brightness') | default(0) | int %}
-                      {% set increase_by = (255 * 0.1) | round %}
+                      {% set increase_by = (current_brightness * 0.1) | round %}
                       {% set new_brightness = current_brightness + increase_by %}
                       {% if new_brightness > 255 %}
                         {% set new_brightness = 255 %}
