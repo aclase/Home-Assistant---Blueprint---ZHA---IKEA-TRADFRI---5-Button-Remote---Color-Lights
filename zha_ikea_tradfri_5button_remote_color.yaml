@@ -11,10 +11,12 @@ blueprint:
       name: IKEA TRADFRI remote control
       description: Select the remote control you wish to use.
       
-      target:
+      selector:
         device:
-          - integration: zha
-            manufacturer: IKEA of Sweden
+          multiple: true
+          filter:
+            - integration: zha
+              manufacturer: IKEA of Sweden
             model: TRADFRI remote control
     light:
       name: Light
