@@ -95,7 +95,7 @@ action:
           - repeat:
               while:
                 - condition: template
-                  value_template: "true"  # Loops indefinitely; ensure there's an external way to stop this.
+                  value_template: "{{ state_attr(var_light, 'brightness') | default(0) | int > 26 }}"  # Check if brightness > 10%
               sequence:
                 - service: light.turn_on
                   target:
