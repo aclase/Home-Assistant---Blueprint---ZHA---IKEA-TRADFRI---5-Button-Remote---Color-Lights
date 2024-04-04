@@ -147,7 +147,7 @@ action:
                     milliseconds: !input speed
 
 
-      # Right Button Short Press - Decrease color temperature by 20% of the range
+      # Right Button Short Press - Decrease color temperature by 20% towards cooler
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "press" and trigger.event.data.args == [256,13,0] }}'
@@ -157,7 +157,7 @@ action:
               entity_id: !input light
             data:
               color_temp: >-
-                {{ [state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int - ((state_attr(var_light, 'max_color_temp_kelvin')|int - state_attr(var_light, 'min_color_temp_kelvin')|int) * 0.2)|int, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
+                {{ [((state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.8)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
 
       # Right Button Long Press - Continuously decrease color temperature by 10%
       - conditions:
@@ -172,11 +172,11 @@ action:
                     entity_id: !input light
                   data:
                     color_temp: >-
-                      {{ [state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int - ((state_attr(var_light, 'max_color_temp_kelvin')|int - state_attr(var_light, 'min_color_temp_kelvin')|int) * 0.1)|int, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
+                      {{ [((state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'min_color_temp_kelvin'))|int) * 0.9)|round, state_attr(var_light, 'min_color_temp_kelvin')|int]|max }}
                 - delay:
                     milliseconds: !input speed
 
-      # Left Button Short Press - Increase color temperature by 20% of the range
+      # Left Button Short Press - Increase color temperature by 20% towards warmer
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "press" and trigger.event.data.args == [257,13,0] }}'
@@ -186,7 +186,7 @@ action:
               entity_id: !input light
             data:
               color_temp: >-
-                {{ [state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int + ((state_attr(var_light, 'max_color_temp_kelvin')|int - state_attr(var_light, 'min_color_temp_kelvin')|int) * 0.2)|int, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
+                {{ [((state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int) * 1.2)|round, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
 
       # Left Button Long Press - Continuously increase color temperature by 10%
       - conditions:
@@ -201,8 +201,9 @@ action:
                     entity_id: !input light
                   data:
                     color_temp: >-
-                      {{ [state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int + ((state_attr(var_light, 'max_color_temp_kelvin')|int - state_attr(var_light, 'min_color_temp_kelvin')|int) * 0.1)|int, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
+                      {{ [((state_attr(var_light, 'color_temp')|default(state_attr(var_light, 'max_color_temp_kelvin'))|int) * 1.1)|round, state_attr(var_light, 'max_color_temp_kelvin')|int]|min }}
                 - delay:
                     milliseconds: !input speed
+
 
     default: []
