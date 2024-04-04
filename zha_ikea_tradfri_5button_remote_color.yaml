@@ -163,7 +163,7 @@ action:
                   data:
                     brightness_step_pct: -10
                 - delay:
-                    milliseconds: !input speed
+                    milliseconds: !input
 
       # Short-Press on the color-up button.
       - conditions:
