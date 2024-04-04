@@ -12,7 +12,7 @@ blueprint:
       description: Select the remote control you wish to use.
       selector:
         device:
-          multiple: false
+          multiple: true
           filter:
             - integration: zha
               manufacturer: IKEA of Sweden
@@ -22,7 +22,7 @@ blueprint:
       description: Select the light entity you wish to control.
       selector:
         entity:
-          multiple: false
+          multiple: true
           filter:
             - domain: light
     speed:
