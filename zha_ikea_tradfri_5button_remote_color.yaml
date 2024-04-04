@@ -88,29 +88,22 @@ action:
               transition: "{{ (var_speed / 1000)|float }}"
 
       # Gradually increase brightness with a long press of the dim-up button.
-- conditions:
+      - conditions:
           - condition: template
-            value_template: "{{ trigger.event.data.command == 'move_with_on_off' }}"
+            value_template: '{{ trigger.event.data.command == "move_with_on_off" }}'
         sequence:
           - repeat:
-              while:
-                - condition: template
-                  value_template: "true"  # Loops indefinitely; ensure there's an external way to stop this.
+              while: []
               sequence:
                 - service: light.turn_on
                   target:
                     entity_id: !input light
                   data:
-                    brightness: >
-                      {% set current_brightness = state_attr(var_light, 'brightness') | default(0) | int %}
-                      {% set increase_by = (255 * 0.1) | round %}
-                      {% set new_brightness = current_brightness + increase_by %}
-                      {% if new_brightness > 255 %}
-                        {% set new_brightness = 255 %}
-                      {% endif %}
-                      {{ new_brightness }}
-                - delay: 
-                    milliseconds: "{{ var_speed }}"
+                    brightness_step_pct: 10
+                    transition: "{{ (var_speed / 1000)|float }}"
+                - delay:
+                    milliseconds: !input speed
+
               
       # Gradually decrease brightness with a long press of the dim-down button, stopping at 10% brightness.
       - conditions:
