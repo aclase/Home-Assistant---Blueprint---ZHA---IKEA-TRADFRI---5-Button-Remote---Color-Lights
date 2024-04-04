@@ -103,11 +103,13 @@ action:
                   data:
                     brightness: >
                       {% set current_brightness = state_attr(var_light, 'brightness') | default(0) | int %}
-                      {% set new_brightness = current_brightness + 25 %}
+                      {% set new_brightness = current_brightness + 25.5 %}
                       {% if new_brightness > 255 %}
                         {% set new_brightness = 255 %}
                       {% endif %}
-                      {{ new_brightness }}
+                      {% set percentage = (new_brightness / 255 * 100) | round %}
+                      {% set rounded_new_brightness = (percentage / 100 * 255) | round %}
+                      {{ rounded_new_brightness }}
                 - delay: 
                     milliseconds: "{{ var_speed }}"
 
