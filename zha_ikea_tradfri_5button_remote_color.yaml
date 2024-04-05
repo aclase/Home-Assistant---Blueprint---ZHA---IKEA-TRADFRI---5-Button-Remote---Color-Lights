@@ -22,7 +22,7 @@ blueprint:
       description: Select the light entity you wish to control.
       selector:
         entity:
-          multiple: true
+          multiple: false
           filter:
             - domain: light
     speed:
