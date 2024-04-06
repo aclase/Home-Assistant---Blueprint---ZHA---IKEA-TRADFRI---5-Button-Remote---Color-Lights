@@ -44,7 +44,7 @@ variables:
   var_light: !input light
   var_speed: !input speed
   var_color_multiplier: 4
-  percentage_adjustment_short: 25
+  percentage_adjustment_short: 33
   percentage_adjustment_long: 10
 
 trigger:
