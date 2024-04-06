@@ -74,7 +74,7 @@ action:
               entity_id: !input light
             data:
               brightness: 254
-              color_temp_kelvin: 2700
+              color_temp_kelvin: 2500
 
       # Increase brightness with a short press of the dim-up button.
       - conditions:
