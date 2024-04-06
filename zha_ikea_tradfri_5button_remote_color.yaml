@@ -179,7 +179,7 @@ action:
                 {% if current_temp <= desired_temp %}
                   {% set new_temp = current_temp %}
                 {% else %}
-                  {% set adjustment = ((current_temp - desired_temp) * (adjustment_percentage / 100.0)) | round %}
+                  {% set adjustment = ((current_temp - desired_temp) * (percentage_adjustment_short / 100.0)) | round %}
                   {% set new_temp = [current_temp - adjustment, desired_temp] | max %}
                 {% endif %}
                 {{ new_temp }}
@@ -201,7 +201,7 @@ action:
                 {% if current_temp >= desired_temp %}
                   {% set new_temp = current_temp %}
                 {% else %}
-                  {% set adjustment = ((desired_temp - current_temp) * (adjustment_percentage / 100.0)) | round %}
+                  {% set adjustment = ((desired_temp - current_temp) * (percentage_adjustment_short / 100.0)) | round %}
                   {% set new_temp = [current_temp + adjustment, desired_temp] | min %}
                 {% endif %}
                 {{ new_temp }}
