@@ -174,7 +174,7 @@ action:
               entity_id: !input light
             data:
               color_temp_kelvin: >
-                {% set current_temp = state_attr('light.your_light_entity_id', 'color_temp_kelvin') | int %}
+                {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
                 {% set desired_temp = 2700 %}
                 {% if current_temp <= desired_temp %}
                   {% set new_temp = current_temp %}
@@ -196,7 +196,7 @@ action:
               entity_id: !input light
             data:
               color_temp_kelvin: >
-                {% set current_temp = state_attr('light.your_light_entity_id', 'color_temp_kelvin') | int %}
+                {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
                 {% set desired_temp = 2700 %}
                 {% if current_temp >= desired_temp %}
                   {% set new_temp = current_temp %}
@@ -221,9 +221,9 @@ action:
                     entity_id: !input light
                   data:
                     color_temp_kelvin: >
-                      {% set current_temp = state_attr('light.your_light_entity_id', 'color_temp') | int %}
-                      {% set min_temp = state_attr('light.your_light_entity_id', 'min_mireds') | int %}
-                      {% set max_temp = state_attr('light.your_light_entity_id', 'max_mireds') | int %}
+                      {% set current_temp = state_attr(var_light, 'color_temp') | int %}
+                      {% set min_temp = state_attr(var_light, 'min_mireds') | int %}
+                      {% set max_temp = state_attr(var_light, 'max_mireds') | int %}
                       {% set temp_range = max_temp - min_temp %}
                       {% set adjustment = (temp_range * (percentage_adjustment_long / 100.0)) | round %}
                       {% set new_temp = [current_temp - adjustment, min_temp] | max %}
@@ -244,9 +244,9 @@ action:
                     entity_id: !input light
                   data:
                     color_temp_kelvin: >
-                      {% set current_temp = state_attr('light.your_light_entity_id', 'color_temp') | int %}
-                      {% set min_temp = state_attr('light.your_light_entity_id', 'min_mireds') | int %}
-                      {% set max_temp = state_attr('light.your_light_entity_id', 'max_mireds') | int %}
+                      {% set current_temp = state_attr(var_light, 'color_temp') | int %}
+                      {% set min_temp = state_attr(var_light, 'min_mireds') | int %}
+                      {% set max_temp = state_attr(var_light, 'max_mireds') | int %}
                       {% set temp_range = max_temp - min_temp %}
                       {% set adjustment = (temp_range * (percentage_adjustment_long / 100.0)) | round %}
                       {% set new_temp = [current_temp + adjustment, max_temp] | min %}
