@@ -164,28 +164,7 @@ action:
               brightness: "{{ new_brightness }}"
               transition: "{{ (var_speed / 1000)|float }}"
 
-      # Right Button Short Press - Decrease color temperature by 20% towards cooler
-      - conditions:
-          - condition: template
-            value_template: '{{ trigger.event.data.command == "press" and trigger.event.data.args == [256,13,0] }}'
-        sequence:
-          - service: light.turn_on
-            target:
-              entity_id: !input light
-            data:
-              color_temp_kelvin: >
-                {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
-                {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int %}
-                {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int %}
-                {% set total_range = max_temp - min_temp %}
-                {% set adjustment = (total_range * (percentage_adjustment_short / 100.0)) | round %}
-                {% set new_temp_raw = current_temp - adjustment %}
-                {% set new_temp = [new_temp_raw, min_temp] | max %}
-                {{ new_temp }}
-          - delay:
-              milliseconds: !input speed
-                
-      # Left Button Short Press - Increase color temperature by 20% towards warmer
+      # Left Button Short Press - Decrease color temperature towards cooler
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "press" and trigger.event.data.args == [257,13,0] }}'
@@ -197,7 +176,28 @@ action:
               color_temp_kelvin: >
                 {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
                 {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int %}
-                {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int %}
+                {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int %}
+                {% set total_range = max_temp - min_temp %}
+                {% set adjustment = (total_range * (percentage_adjustment_short / 100.0)) | round %}
+                {% set new_temp_raw = current_temp - adjustment %}
+                {% set new_temp = [new_temp_raw, min_temp] | max %}
+                {{ new_temp }}
+          - delay:
+              milliseconds: !input speed
+                
+      # Right Button Short Press - Increase color temperature towards warmer
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "press" and trigger.event.data.args == [256,13,0] }}'
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input light
+            data:
+              color_temp_kelvin: >
+                {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
+                {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2200) | int %}
+                {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int %}
                 {% set total_range = max_temp - min_temp %}
                 {% set adjustment = (total_range * (percentage_adjustment_short / 100.0)) | round %}
                 {% set new_temp_raw = current_temp + adjustment %}
@@ -206,31 +206,7 @@ action:
           - delay:
               milliseconds: !input speed
 
-      # Right Button Long Press - Continuously decrease color temperature by 20%
-      - conditions:
-          - condition: template
-            value_template: '{{ trigger.event.data.command == "hold" and trigger.event.data.args == [3328,0] }}'
-        sequence:
-          - repeat:
-              while: []
-              sequence:
-                - service: light.turn_on
-                  target:
-                    entity_id: !input light
-                  data:
-                    color_temp_kelvin: >
-                      {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
-                      {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int %}
-                      {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int %}
-                      {% set total_range = max_temp - min_temp %}
-                      {% set adjustment = (total_range * (percentage_adjustment_long / 100.0)) | round %}
-                      {% set new_temp_raw = current_temp - adjustment %}
-                      {% set new_temp = [new_temp_raw, min_temp] | max %}
-                      {{ new_temp }}
-                - delay:
-                    milliseconds: !input speed
-                    
-      # Left Button Long Press - Continuously increase color temperature by 20%
+      # Left Button Long Press - Continuously decrease color temperature by 20%
       - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.command == "hold" and trigger.event.data.args == [3329,0] }}'
@@ -244,8 +220,32 @@ action:
                   data:
                     color_temp_kelvin: >
                       {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
-                      {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int %}
-                      {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int %}
+                      {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2200) | int %}
+                      {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int %}
+                      {% set total_range = max_temp - min_temp %}
+                      {% set adjustment = (total_range * (percentage_adjustment_long / 100.0)) | round %}
+                      {% set new_temp_raw = current_temp - adjustment %}
+                      {% set new_temp = [new_temp_raw, min_temp] | max %}
+                      {{ new_temp }}
+                - delay:
+                    milliseconds: !input speed
+                    
+      # Right Button Long Press - Continuously increase color temperature by 20%
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.command == "hold" and trigger.event.data.args == [3328,0] }}'
+        sequence:
+          - repeat:
+              while: []
+              sequence:
+                - service: light.turn_on
+                  target:
+                    entity_id: !input light
+                  data:
+                    color_temp_kelvin: >
+                      {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
+                      {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2200) | int %}
+                      {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int %}
                       {% set total_range = max_temp - min_temp %}
                       {% set adjustment = (total_range * (percentage_adjustment_long / 100.0)) | round %}
                       {% set new_temp_raw = current_temp + adjustment %}
