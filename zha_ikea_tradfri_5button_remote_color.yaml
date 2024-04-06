@@ -175,7 +175,7 @@ action:
             data:
               color_temp_kelvin: >
                 {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
-                {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int %}
+                {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2200) | int %}
                 {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int %}
                 {% set total_range = max_temp - min_temp %}
                 {% set adjustment = (total_range * (percentage_adjustment_short / 100.0)) | round %}
