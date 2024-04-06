@@ -175,13 +175,12 @@ action:
             data:
               color_temp_kelvin: >
                 {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
-                {% set desired_temp = 2700 %}
-                {% if current_temp <= desired_temp %}
-                  {% set new_temp = current_temp %}
-                {% else %}
-                  {% set adjustment = ((current_temp - desired_temp) * (percentage_adjustment_short / 100.0)) | round %}
-                  {% set new_temp = [current_temp - adjustment, desired_temp] | max %}
-                {% endif %}
+                {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int %}
+                {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int %}
+                {% set total_range = max_temp - min_temp %}
+                {% set adjustment = (total_range * (percentage_adjustment_short / 100.0)) | round %}
+                {% set new_temp_raw = current_temp - adjustment %}
+                {% set new_temp = [new_temp_raw, min_temp] | max %}
                 {{ new_temp }}
           - delay:
               milliseconds: !input speed
@@ -197,13 +196,12 @@ action:
             data:
               color_temp_kelvin: >
                 {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
-                {% set desired_temp = 2700 %}
-                {% if current_temp >= desired_temp %}
-                  {% set new_temp = current_temp %}
-                {% else %}
-                  {% set adjustment = ((desired_temp - current_temp) * (percentage_adjustment_short / 100.0)) | round %}
-                  {% set new_temp = [current_temp + adjustment, desired_temp] | min %}
-                {% endif %}
+                {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int %}
+                {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int %}
+                {% set total_range = max_temp - min_temp %}
+                {% set adjustment = (total_range * (percentage_adjustment_short / 100.0)) | round %}
+                {% set new_temp_raw = current_temp + adjustment %}
+                {% set new_temp = [new_temp_raw, max_temp] | min %}
                 {{ new_temp }}
           - delay:
               milliseconds: !input speed
@@ -221,12 +219,13 @@ action:
                     entity_id: !input light
                   data:
                     color_temp_kelvin: >
-                      {% set current_temp = state_attr(var_light, 'color_temp') | int %}
-                      {% set min_temp = state_attr(var_light, 'min_mireds') | int %}
-                      {% set max_temp = state_attr(var_light, 'max_mireds') | int %}
-                      {% set temp_range = max_temp - min_temp %}
-                      {% set adjustment = (temp_range * (percentage_adjustment_long / 100.0)) | round %}
-                      {% set new_temp = [current_temp - adjustment, min_temp] | max %}
+                      {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
+                      {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int %}
+                      {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int %}
+                      {% set total_range = max_temp - min_temp %}
+                      {% set adjustment = (total_range * (percentage_adjustment_long / 100.0)) | round %}
+                      {% set new_temp_raw = current_temp - adjustment %}
+                      {% set new_temp = [new_temp_raw, min_temp] | max %}
                       {{ new_temp }}
                 - delay:
                     milliseconds: !input speed
@@ -244,12 +243,13 @@ action:
                     entity_id: !input light
                   data:
                     color_temp_kelvin: >
-                      {% set current_temp = state_attr(var_light, 'color_temp') | int %}
-                      {% set min_temp = state_attr(var_light, 'min_mireds') | int %}
-                      {% set max_temp = state_attr(var_light, 'max_mireds') | int %}
-                      {% set temp_range = max_temp - min_temp %}
-                      {% set adjustment = (temp_range * (percentage_adjustment_long / 100.0)) | round %}
-                      {% set new_temp = [current_temp + adjustment, max_temp] | min %}
+                      {% set current_temp = state_attr(var_light, 'color_temp_kelvin') | int %}
+                      {% set min_temp = state_attr(var_light, 'min_color_temp_kelvin') | default(2500) | int %}
+                      {% set max_temp = state_attr(var_light, 'max_color_temp_kelvin') | default(6500) | int %}
+                      {% set total_range = max_temp - min_temp %}
+                      {% set adjustment = (total_range * (percentage_adjustment_long / 100.0)) | round %}
+                      {% set new_temp_raw = current_temp + adjustment %}
+                      {% set new_temp = [new_temp_raw, max_temp] | min %}
                       {{ new_temp }}
                 - delay:
                     milliseconds: !input speed
