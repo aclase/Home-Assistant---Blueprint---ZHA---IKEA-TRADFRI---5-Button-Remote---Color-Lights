@@ -44,6 +44,8 @@ variables:
   var_light: !input light
   var_speed: !input speed
   var_color_multiplier: 4
+  percentage_adjustment_short: 20
+  percentage_adjustment_long: 10
 
 trigger:
   - platform: event
@@ -72,7 +74,7 @@ action:
               entity_id: !input light
             data:
               brightness: 254
-              color_temp_kelvin: 2800
+              color_temp_kelvin: 2700
 
       # Increase brightness with a short press of the dim-up button.
       - conditions:
@@ -172,9 +174,14 @@ action:
               entity_id: !input light
             data:
               color_temp_kelvin: >
-                {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int) / var_color_multiplier) | round %}
-                {% set new_temp_raw = [state_attr(var_light, 'color_temp_kelvin') | default(4000) | int - adjustment, state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int] | max %}
-                {% set new_temp = ((new_temp_raw + 50) / 100) | round * 100 %}
+                {% set current_temp = state_attr('light.your_light_entity_id', 'color_temp_kelvin') | int %}
+                {% set desired_temp = 2700 %}
+                {% if current_temp <= desired_temp %}
+                  {% set new_temp = current_temp %}
+                {% else %}
+                  {% set adjustment = ((current_temp - desired_temp) * (adjustment_percentage / 100.0)) | round %}
+                  {% set new_temp = [current_temp - adjustment, desired_temp] | max %}
+                {% endif %}
                 {{ new_temp }}
           - delay:
               milliseconds: !input speed
@@ -189,9 +196,14 @@ action:
               entity_id: !input light
             data:
               color_temp_kelvin: >
-                {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int) / var_color_multiplier) | round %}
-                {% set new_temp_raw = [state_attr(var_light, 'color_temp_kelvin') | default(2510) | int + adjustment, state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int] | min %}
-                {% set new_temp = ((new_temp_raw + 50) / 100) | round * 100 %}
+                {% set current_temp = state_attr('light.your_light_entity_id', 'color_temp_kelvin') | int %}
+                {% set desired_temp = 2700 %}
+                {% if current_temp >= desired_temp %}
+                  {% set new_temp = current_temp %}
+                {% else %}
+                  {% set adjustment = ((desired_temp - current_temp) * (adjustment_percentage / 100.0)) | round %}
+                  {% set new_temp = [current_temp + adjustment, desired_temp] | min %}
+                {% endif %}
                 {{ new_temp }}
           - delay:
               milliseconds: !input speed
@@ -209,9 +221,12 @@ action:
                     entity_id: !input light
                   data:
                     color_temp_kelvin: >
-                      {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int) / var_color_multiplier) | round %}
-                      {% set new_temp_raw = [state_attr(var_light, 'color_temp_kelvin') | default(4000) | int - adjustment, state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int] | max %}
-                      {% set new_temp = ((new_temp_raw + 50) / 100) | round * 100 %}
+                      {% set current_temp = state_attr('light.your_light_entity_id', 'color_temp') | int %}
+                      {% set min_temp = state_attr('light.your_light_entity_id', 'min_mireds') | int %}
+                      {% set max_temp = state_attr('light.your_light_entity_id', 'max_mireds') | int %}
+                      {% set temp_range = max_temp - min_temp %}
+                      {% set adjustment = (temp_range * (percentage_adjustment_long / 100.0)) | round %}
+                      {% set new_temp = [current_temp - adjustment, min_temp] | max %}
                       {{ new_temp }}
                 - delay:
                     milliseconds: !input speed
@@ -229,9 +244,12 @@ action:
                     entity_id: !input light
                   data:
                     color_temp_kelvin: >
-                      {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int) / var_color_multiplier) | round %}
-                      {% set new_temp_raw = [state_attr(var_light, 'color_temp_kelvin') | default(2510) | int + adjustment, state_attr(var_light, 'max_color_temp_kelvin') | default(2510) | int] | min %}
-                      {% set new_temp = ((new_temp_raw + 50) / 100) | round * 100 %}
+                      {% set current_temp = state_attr('light.your_light_entity_id', 'color_temp') | int %}
+                      {% set min_temp = state_attr('light.your_light_entity_id', 'min_mireds') | int %}
+                      {% set max_temp = state_attr('light.your_light_entity_id', 'max_mireds') | int %}
+                      {% set temp_range = max_temp - min_temp %}
+                      {% set adjustment = (temp_range * (percentage_adjustment_long / 100.0)) | round %}
+                      {% set new_temp = [current_temp + adjustment, max_temp] | min %}
                       {{ new_temp }}
                 - delay:
                     milliseconds: !input speed
