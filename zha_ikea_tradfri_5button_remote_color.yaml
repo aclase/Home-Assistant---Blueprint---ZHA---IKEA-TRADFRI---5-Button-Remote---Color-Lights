@@ -35,7 +35,7 @@ blueprint:
           step: 100
           unit_of_measurement: milliseconds
           mode: slider
-      default: 500
+      default: 300
 
 mode: restart
 max_exceeded: silent
@@ -43,7 +43,7 @@ max_exceeded: silent
 variables:
   var_light: !input light
   var_speed: !input speed
-  var_color_multiplier: 5
+  var_color_multiplier: 4
 
 trigger:
   - platform: event
@@ -173,7 +173,8 @@ action:
             data:
               color_temp_kelvin: >
                 {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int) / var_color_multiplier) | round %}
-                {% set new_temp = [state_attr(var_light, 'color_temp_kelvin') | default(4000) | int - adjustment, state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int] | max %}
+                {% set new_temp_raw = [state_attr(var_light, 'color_temp_kelvin') | default(4000) | int - adjustment, state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int] | max %}
+                {% set new_temp = ((new_temp_raw + 50) / 100) | round * 100 %}
                 {{ new_temp }}
           - delay:
               milliseconds: !input speed
@@ -189,7 +190,8 @@ action:
             data:
               color_temp_kelvin: >
                 {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int) / var_color_multiplier) | round %}
-                {% set new_temp = [state_attr(var_light, 'color_temp_kelvin') | default(2510) | int + adjustment, state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int] | min %}
+                {% set new_temp_raw = [state_attr(var_light, 'color_temp_kelvin') | default(2510) | int + adjustment, state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int] | min %}
+                {% set new_temp = ((new_temp_raw + 50) / 100) | round * 100 %}
                 {{ new_temp }}
           - delay:
               milliseconds: !input speed
@@ -208,7 +210,8 @@ action:
                   data:
                     color_temp_kelvin: >
                       {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int) / var_color_multiplier) | round %}
-                      {% set new_temp = [state_attr(var_light, 'color_temp_kelvin') | default(4000) | int - adjustment, state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int] | max %}
+                      {% set new_temp_raw = [state_attr(var_light, 'color_temp_kelvin') | default(4000) | int - adjustment, state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int] | max %}
+                      {% set new_temp = ((new_temp_raw + 50) / 100) | round * 100 %}
                       {{ new_temp }}
                 - delay:
                     milliseconds: !input speed
@@ -227,7 +230,8 @@ action:
                   data:
                     color_temp_kelvin: >
                       {% set adjustment = ((state_attr(var_light, 'max_color_temp_kelvin') | default(4000) | int - state_attr(var_light, 'min_color_temp_kelvin') | default(2510) | int) / var_color_multiplier) | round %}
-                      {% set new_temp = [state_attr(var_light, 'color_temp_kelvin') | default(2510) | int + adjustment, state_attr(var_light, 'max_color_temp_kelvin') | default(2510) | int] | min %}
+                      {% set new_temp_raw = [state_attr(var_light, 'color_temp_kelvin') | default(2510) | int + adjustment, state_attr(var_light, 'max_color_temp_kelvin') | default(2510) | int] | min %}
+                      {% set new_temp = ((new_temp_raw + 50) / 100) | round * 100 %}
                       {{ new_temp }}
                 - delay:
                     milliseconds: !input speed
